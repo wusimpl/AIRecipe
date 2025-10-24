@@ -1,0 +1,78 @@
+# Environment variables (前端和后端都只使用 .env 文件)
+.env
+*.swp
+*.swo
+
+# Sensitive configuration files
+config/llm_providers.json
+backend/config/llm_providers.json
+
+# Development and project-specific documentation
+CLAUDE.md
+**/CLAUDE.md
+AGENTS.md
+docs/*todo.md
+**/docs/*todo.md
+
+# WeChat validation files
+cf115727687ff531f1aaaf5f9e318da2.txt
+**/cf115727687ff531f1aaaf5f9e318da2.txt
+
+# Python
+.venv
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.cache/
+poetry.lock
+*.egg-info/
+dist/
+build/
+
+# Node.js / Frontend
+node_modules/
+.next/
+.vercel/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Process management
+pids/
+
+# Test coverage
+.coverage
+htmlcov/
+coverage/
+
+# Deployment & Domain-specific files (不开源域名配置)
+start-prod.sh
+uninstall.sh
+clean-git-history.sh
+
+# Scripts that may contain sensitive operations
+backend/scripts/
+
+# Git backup
+.git.backup/

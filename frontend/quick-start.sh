@@ -1,0 +1,1 @@
+pnpm dev --port 8090 --hostname 0.0.0.0

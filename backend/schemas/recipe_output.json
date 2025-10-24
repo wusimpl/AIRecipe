@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RecipeOutput",
+  "type": "object",
+  "required": [
+    "菜名",
+    "标签",
+    "简介",
+    "难度",
+    "准备时间",
+    "烹饪时间",
+    "总时间",
+    "用料",
+    "烹饪流程",
+    "版本",
+    "作者",
+    "创建时间"
+  ],
+  "properties": {
+    "菜名": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "标签": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "简介": {
+      "type": "string",
+      "minLength": 10
+    },
+    "难度": {
+      "type": "string",
+      "enum": ["入门", "中级", "进阶", "大师"]
+    },
+    "准备时间": {
+      "type": "string",
+      "minLength": 1
+    },
+    "烹饪时间": {
+      "type": "string",
+      "minLength": 1
+    },
+    "总时间": {
+      "type": "string",
+      "minLength": 1
+    },
+    "选材": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "用料": {
+      "type": "object",
+      "required": ["主料"],
+      "properties": {
+        "主料": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "辅料": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "调味料": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "预处理": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "烹饪流程": {
+      "type": "object",
+      "required": ["步骤顺序数组"],
+      "properties": {
+        "步骤顺序数组": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["步骤名", "操作"],
+            "properties": {
+              "步骤名": { "type": "string", "minLength": 1 },
+              "操作": { "type": "string", "minLength": 1 },
+              "时间": { "type": "string" },
+              "火候": { "type": "string" },
+              "tips": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "进阶技巧": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "保存与食用": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "其他注意事项": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "版本": {
+      "type": "string",
+      "minLength": 1
+    },
+    "作者": {
+      "type": "string",
+      "minLength": 1
+    },
+    "创建时间": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": true
+}

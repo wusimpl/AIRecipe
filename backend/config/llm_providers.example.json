@@ -1,0 +1,21 @@
+{
+  "default_provider": "primary-openai",
+  "providers": [
+    {
+      "name": "primary-openai",
+      "api_base": "https://api.openai.com/v1",
+      "model": "gpt-4o",
+      "api_key": "replace-with-your-openai-compatible-api-key",
+      "switch": true,
+      "description": "Primary OpenAI provider"
+    },
+    {
+      "name": "backup-local",
+      "api_base": "http://localhost:11434/v1",
+      "model": "llama3",
+      "api_key": "replace-with-local-provider-token-if-required",
+      "switch": false,
+      "description": "Local backup provider (disabled)"
+    }
+  ]
+}
