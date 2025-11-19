@@ -177,3 +177,38 @@ async def get_require_api_key_config() -> RequireApiKeyResponse:
     settings = get_settings()
     logger.info(f"配置查询: require_api_key={settings.require_api_key}")
     return RequireApiKeyResponse(requireApiKey=settings.require_api_key)
+
+
+@router.get(
+    "/{dish_name}",
+    response_model=RecipeGenerationResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_recipe_by_name(
+    dish_name: str,
+    provider: str | None = None,
+    _: None = Depends(verify_api_key),
+    service: RecipeService = Depends(get_recipe_service),
+) -> RecipeGenerationResponse:
+    """根据菜名从缓存中获取菜谱。
+
+    Args:
+        dish_name: 菜名（URL 路径参数，支持中文）
+        provider: 可选的提供商名称（查询参数）
+
+    Returns:
+        RecipeGenerationResponse: 缓存的菜谱数据
+
+    Raises:
+        404: 缓存中不存在该菜谱
+    """
+    try:
+        return await service.get_recipe_from_cache(
+            dish_name=dish_name,
+            provider_name=provider,
+        )
+    except RecipeCacheMissError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc

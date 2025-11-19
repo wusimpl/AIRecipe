@@ -73,8 +73,8 @@ AIRecipe/
 
 **后端：**
 - Python 3.11+
-- Redis（推荐）或内存缓存
-- Conda（推荐）
+- Redis
+- Conda（optional, 推荐）
 
 **前端：**
 - Node.js 18.17.0+
@@ -88,7 +88,7 @@ AIRecipe/
 # 进入后端目录
 cd backend
 
-# 创建 Conda 环境
+# 创建 Conda 环境(确保你已经安装conda，或者你也可以使用其他python虚拟环境）
 conda create -n airecipe python=3.11
 conda activate airecipe
 
@@ -97,17 +97,16 @@ pip install -r requirements.txt
 
 # 配置环境变量
 cp .env.example .env
-# 编辑 .env 文件，设置 API Keys 等
+# 编辑 .env 文件，设置 API Keys 和 redis URL
 
 # 配置 LLM 提供商
 cp config/llm_providers.example.json config/llm_providers.json
-# 编辑配置文件，添加你的 API Keys
 
 # 启动服务（自动处理端口占用）
 ./start.sh
 ```
 
-后端将在 `http://localhost:8089` 运行，API 文档可访问 `http://localhost:8089/docs`
+后端将在 `http://localhost:8089` 运行
 
 #### 2. 启动前端
 
@@ -127,16 +126,6 @@ pnpm dev
 ```
 
 前端将在 `http://localhost:3000` 运行
-
-#### 3. 一键启动（推荐）
-
-在项目根目录使用启动脚本：
-
-```bash
-./start-dev.sh
-```
-
-将自动启动后端（端口 8089）和前端（端口 8090）服务。
 
 ### 首次使用
 

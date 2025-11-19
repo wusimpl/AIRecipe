@@ -1,3 +1,6 @@
+./DEPLOYMENT.md
+docs
+
 # Environment variables (前端和后端都只使用 .env 文件)
 .env
 *.swp
@@ -11,8 +14,6 @@ backend/config/llm_providers.json
 CLAUDE.md
 **/CLAUDE.md
 AGENTS.md
-docs/*todo.md
-**/docs/*todo.md
 
 # WeChat validation files
 cf115727687ff531f1aaaf5f9e318da2.txt

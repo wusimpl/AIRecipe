@@ -48,7 +48,7 @@ pnpm install
 创建 `.env` 文件：
 
 ```bash
-NEXT_PUBLIC_API_BASE_URL=http://8.216.12.129:8089
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8089
 ```
 
 ### 启动开发服务器
@@ -57,14 +57,7 @@ NEXT_PUBLIC_API_BASE_URL=http://8.216.12.129:8089
 pnpm dev
 ```
 
-访问 http://localhost:3000
-
-### 生产构建
-
-```bash
-pnpm build
-pnpm start
-```
+访问 http://localhost:8090
 
 ## 项目结构
 
@@ -167,45 +160,14 @@ RecipeResultPreview 类型验证
 - **Mutations**: 不重试
 - 提供商列表缓存 10 分钟
 
-## 开发规范
-
-### 代码风格
-
-- 使用 **TypeScript strict mode**
-- 组件命名：**PascalCase**
-- 函数命名：**camelCase**
-- 避免使用 `any` 类型
-- 路径别名：`@/*` → `./src/*`
-
-### 提交前检查
-
-```bash
-# 运行 Lint 检查
-pnpm lint
-
-# 运行测试
-pnpm test
-```
-
-### 环境变量管理
-
-- ✅ 仅使用一个 `.env` 文件
-- ❌ 禁止创建 `.env.local`、`.env.development` 等
-- 修改环境变量后需重启开发服务器
 
 ## 重要注意事项
-
-### API 地址配置
-
-- ✅ 生产环境：`NEXT_PUBLIC_API_BASE_URL=http://8.216.12.129:8089`
-- ❌ 禁止使用 `localhost` 地址（项目部署在公网服务器）
 
 ### API Key 认证
 
 - 用户首次访问时需手动输入 API Key
 - API Key 存储在 Cookie 中（有效期 30 天）
 - Cookie 名称：`airecipe_api_key`
-- 用户可通过界面"更换密钥"按钮清除
 
 ### Redis 缓存（开发调试）
 
@@ -225,29 +187,4 @@ redis-cli FLUSHALL
 | `pnpm build` | 生产构建 |
 | `pnpm start` | 启动生产服务器 |
 | `pnpm lint` | 运行 ESLint 检查 |
-| `pnpm test` | 运行单元测试 |
-| `pnpm test:watch` | 测试监视模式 |
 
-## 后续计划
-
-- [ ] 本地历史列表展示
-- [ ] 菜谱收藏功能
-- [ ] 分享链接生成
-- [ ] 打印样式优化
-- [ ] 多语言支持
-- [ ] PWA 支持
-
-## 相关文档
-
-- [前端设计文档](./docs/frontend_design.md)
-- [菜谱展示页面设计](./docs/菜谱展示页面设计.md)
-- [Claude Code 项目指引](./CLAUDE.md)
-- [后端 API 文档](../backend/README.md)
-
-## License
-
-MIT
-
----
-
-**最后更新：** 2025-01-24

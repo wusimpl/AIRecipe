@@ -11,7 +11,7 @@
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8089
 
 # 服务器部署（改为服务器公网IP和端口）
-NEXT_PUBLIC_API_BASE_URL=http://8.216.12.129:8089
+NEXT_PUBLIC_API_BASE_URL=http://domain:8089
 ```
 
 #### 2. 启动脚本 (`start-dev.sh`)

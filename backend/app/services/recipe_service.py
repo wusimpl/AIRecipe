@@ -220,6 +220,61 @@ class RecipeService:
         await self._store_in_cache(cache, cache_key, recipe_payload)
         return self._build_response(provider_name, recipe_payload, cached=False)
 
+    async def get_recipe_from_cache(
+        self,
+        dish_name: str,
+        provider_name: str | None = None,
+    ) -> RecipeGenerationResponse:
+        """从缓存中获取菜谱，如果不存在则抛出 RecipeCacheMissError。
+
+        Args:
+            dish_name: 菜名
+            provider_name: 提供商名称，如果为 None 则使用默认提供商
+
+        Returns:
+            RecipeGenerationResponse: 缓存的菜谱响应
+
+        Raises:
+            RecipeCacheMissError: 缓存中不存在该菜谱
+        """
+        # 如果未指定提供商，使用默认提供商
+        if provider_name is None:
+            if self._registry is not None:
+                provider_name = self._registry._config.default_provider
+            elif self._provider is not None:
+                provider_name = self._provider.name
+            else:
+                raise RecipeServiceError("未配置提供商且未指定提供商名称")
+
+        cache = self._get_cache()
+        cache_key = self._make_cache_key_from_dish(provider_name, dish_name)
+
+        logger.info(
+            "正在查询缓存 - 菜名: '%s', 提供商: '%s', 缓存键: %s",
+            dish_name,
+            provider_name,
+            cache_key
+        )
+
+        cached_payload = await self._fetch_from_cache(cache, cache_key)
+
+        if cached_payload is None:
+            logger.info(
+                "缓存未命中 - 菜名: '%s', 提供商: '%s'",
+                dish_name,
+                provider_name,
+            )
+            raise RecipeCacheMissError(
+                f"菜谱 '{dish_name}' (提供商: '{provider_name}') 尚未生成"
+            )
+
+        logger.info(
+            "缓存命中 - 菜名: '%s', 提供商: '%s'",
+            dish_name,
+            provider_name,
+        )
+        return self._build_response(provider_name, cached_payload, cached=True)
+
     def _make_cache_key(
         self, provider_name: str, request: RecipeGenerationRequest
     ) -> str:

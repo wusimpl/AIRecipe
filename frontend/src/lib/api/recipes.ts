@@ -4,6 +4,7 @@ const GENERATE_RECIPE_PATH = "/api/v1/recipes/generate";
 const CACHE_RECIPE_PATH = "/api/v1/recipes/cache";
 const LIST_PROVIDERS_PATH = "/api/v1/recipes/providers";
 const REQUIRE_API_KEY_PATH = "/api/v1/recipes/config/require-api-key";
+const GET_RECIPE_PATH = "/api/v1/recipes"; // 根据菜名查询缓存的菜谱
 
 export interface GenerateRecipePayload {
   dishName: string;
@@ -336,4 +337,40 @@ export const generateRecipeStream = async (
 
     onError(new Error(friendlyMessage));
   }
+};
+
+/**
+ * 根据菜名从缓存中查询菜谱
+ *
+ * @param dishName - 菜名（支持中文，会自动进行 URL 编码）
+ * @param provider - 可选的提供商名称，如果未指定则使用默认提供商
+ * @returns 菜谱生成结果，如果缓存未命中则抛出 404 错误
+ * @throws {ApiError} 404 - 缓存中不存在该菜谱
+ * @throws {ApiError} 401 - API Key 验证失败
+ */
+export const fetchRecipeByName = async (
+  dishName: string,
+  provider?: string
+): Promise<RecipeGenerationResult> => {
+  // URL 编码菜名以支持中文和特殊字符
+  const encodedDishName = encodeURIComponent(dishName);
+
+  // 构建请求路径
+  let path = `${GET_RECIPE_PATH}/${encodedDishName}`;
+
+  // 如果指定了提供商，添加查询参数
+  if (provider) {
+    path += `?provider=${encodeURIComponent(provider)}`;
+  }
+
+  const response = await apiFetch<RecipeGenerationApiResponse>(path, {
+    method: "GET",
+  });
+
+  return {
+    requestId: response.request_id,
+    provider: response.provider,
+    recipe: response.recipe,
+    cached: response.cached,
+  };
 };

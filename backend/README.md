@@ -8,7 +8,7 @@ AIRecipe Backend 是一个高性能的 AI 菜谱生成后端服务，支持调�
 
 ### 核心特性
 
-- **多 LLM 提供商支持**：支持配置多个 OpenAI 兼容的 API 提供商（OpenAI、Groq、Ark、BigModel 等）
+- **多 LLM 提供商支持**：支持配置多个 OpenAI 兼容的 API 提供商
 - **智能路由策略**：支持默认提供商、加权轮询等多种路由策略
 - **流式输出**：通过 Server-Sent Events (SSE) 提供实时流式生成体验
 - **高性能缓存**：支持 Redis 和内存缓存，避免重复调用 LLM
@@ -28,32 +28,6 @@ AIRecipe Backend 是一个高性能的 AI 菜谱生成后端服务，支持调�
 - **开发工具**：pytest、mypy、ruff、black
 
 ## 项目架构
-
-### 三层架构设计
-
-```
-┌─────────────────────────────────────────────────────┐
-│              路由层 (routers/)                       │
-│  - API 端点定义                                      │
-│  - 请求/响应模型                                     │
-│  - API Key 验证                                      │
-└─────────────────┬───────────────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────────────────┐
-│              服务层 (services/)                      │
-│  - 业务逻辑编排                                      │
-│  - Prompt 组装                                       │
-│  - 缓存管理                                          │
-│  - 结果验证                                          │
-└─────────────────┬───────────────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────────────────┐
-│            Provider 层 (llm/)                        │
-│  - LLM 提供商抽象                                    │
-│  - 多提供商实现                                      │
-│  - 智能路由选择                                      │
-└─────────────────────────────────────────────────────┘
-```
 
 ### 目录结构
 
@@ -160,6 +134,8 @@ backend/
 2. **结构化日志中间件**：记录请求/响应详情
 3. **请求 ID 中间件**：为每个请求分配唯一 UUID
 
+**注意**：速率限制功能已移除，可根据需要通过 Nginx 或其他反向代理实现。
+
 ## API 端点
 
 ### 主要接口
@@ -167,17 +143,22 @@ backend/
 | 方法 | 路径 | 功能 | 认证 |
 |------|------|------|------|
 | GET | `/` | 健康检查 | 否 |
-| POST | `/api/v1/recipes/generate` | 同步生成菜谱 | 是 |
-| POST | `/api/v1/recipes/generate/stream` | 流式生成菜谱（SSE） | 是 |
-| POST | `/api/v1/recipes/cache` | 前端回传菜谱缓存 | 是 |
-| GET | `/api/v1/recipes/providers` | 获取可用提供商列表 | 是 |
+| GET | `/api/v1/recipes/config/require-api-key` | 查询是否需要 API Key | 否 |
+| POST | `/api/v1/recipes/generate` | 同步生成菜谱 | 可选* |
+| POST | `/api/v1/recipes/generate/stream` | 流式生成菜谱（SSE） | 可选* |
+| POST | `/api/v1/recipes/cache` | 前端回传菜谱缓存 | 可选* |
+| GET | `/api/v1/recipes/providers` | 获取可用提供商列表 | 可选* |
+
+**\*认证可选**：通过环境变量 `REQUIRE_API_KEY` 控制是否需要认证
 
 ### 认证方式
 
-所有需要认证的接口需在 Header 中提供：
+当 `REQUIRE_API_KEY=true` 时，需要在 Header 中提供：
 ```
 X-API-Key: your-api-key
 ```
+
+当 `REQUIRE_API_KEY=false` 时，无需提供 API Key（适用于开发环境或内网部署）
 
 ## 快速开始
 
@@ -204,6 +185,7 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 # 编辑 .env 文件，设置必要的环境变量
+# 开发环境可以设置 REQUIRE_API_KEY=false
 ```
 
 4. **配置 LLM 提供商**：
@@ -235,7 +217,10 @@ uvicorn app.main:app --host 0.0.0.0 --port 8089 --reload
 # 应用配置
 APP_ENV=development
 LOG_LEVEL=INFO
-API_KEYS=key1,key2,key3  # 逗号分隔的 API Keys
+
+# API Key 认证（可选）
+REQUIRE_API_KEY=false  # true 或 false，控制是否需要 API Key 验证
+API_KEYS=demo-key  # 当 REQUIRE_API_KEY=true 时，允许的 API Keys（逗号分隔）
 
 # LLM 配置
 LLM_CONFIG_PATH=config/llm_providers.json
@@ -245,12 +230,6 @@ RECIPE_SCHEMA_PATH=schemas/recipe_output.json
 # 缓存配置
 CACHE_BACKEND=redis  # redis 或 memory
 REDIS_URL=redis://localhost:6379/0
-CACHE_TTL_SECONDS=86400  # 缓存过期时间（秒）
-
-# CORS 配置
-CORS_ALLOW_ORIGINS=*
-CORS_ALLOW_METHODS=*
-CORS_ALLOW_HEADERS=*
 ```
 
 ### LLM Provider 配置
@@ -268,7 +247,7 @@ CORS_ALLOW_HEADERS=*
       "name": "primary-openai",
       "api_base": "https://api.openai.com/v1",
       "model": "gpt-4o",
-      "api_key": "${OPENAI_API_KEY}",
+      "api_key": "sk-xxxx",
       "timeout": 30,
       "max_retries": 2,
       "backoff_factor": 0.5,
@@ -292,24 +271,16 @@ CORS_ALLOW_HEADERS=*
 - `weight`：权重（用于加权路由）
 - `switch`：是否启用该提供商
 
-### Provider 选择
-
-- **低延迟优先**：使用 Groq 等快速提供商作为默认
-- **负载均衡**：通过加权路由分散请求
-- **故障恢复**：配置超时和重试策略
-
 ### 流式输出
 
-- 减少用户等待时间
-- 提升用户体验
-- 适合长文本生成场景
+- 减少用户等待时间, 提升用户体验
 
 ## 安全考虑
 
 ### API Key 管理
 
-- 在 `.env` 文件中配置白名单
-- 不在日志中打印完整 API Key
+- **可选的认证机制**：通过 `REQUIRE_API_KEY` 环境变量控制是否启用 API Key 验证
+- 开发环境可设置 `REQUIRE_API_KEY=false` 以简化流程
 - 使用环境变量管理敏感信息
 
 ### CORS 配置
@@ -329,22 +300,25 @@ CORS_ALLOW_HEADERS=*
 
 编辑 `config/llm_providers.json`，在 `providers` 数组中添加新配置，确保 API 兼容 OpenAI 格式。
 
-### 2. 缓存不生效怎么办？
+### 2. 如何禁用 API Key 验证？
+
+在 `.env` 文件中设置：
+```bash
+REQUIRE_API_KEY=false
+```
+
+### 3. 缓存不生效怎么办？
 
 检查：
 - Redis 服务是否运行
 - `REDIS_URL` 配置是否正确
 - 查看日志中的缓存操作记录
 
-### 3. JSON Schema 验证失败？
+### 4. JSON Schema 验证失败？
 
 查看：
 - LLM 输出是否符合 `schemas/recipe_output.json` 定义
 - System Prompt 是否明确指定输出格式
 - 是否需要优化 Prompt
 
-
-## 许可证
-
-待定
 
