@@ -77,3 +77,4 @@ backend/scripts/
 
 # Git backup
 .git.backup/
+start.sh
